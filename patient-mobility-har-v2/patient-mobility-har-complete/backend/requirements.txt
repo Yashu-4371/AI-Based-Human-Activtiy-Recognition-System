@@ -1,0 +1,52 @@
+# ==========================================================
+# Backend dependencies — AI-Based Human Activity Recognition
+# System for Patient Mobility Assessment
+# ==========================================================
+
+# --- Web framework ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# --- Data validation / settings ---
+pydantic==2.9.2
+pydantic-settings==2.5.2
+email-validator==2.2.0
+
+# --- Database ---
+sqlalchemy==2.0.35
+alembic==1.13.3
+
+# --- Authentication / security ---
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1  # pinned: passlib 1.7.4 is incompatible with bcrypt>=4.1 (breaks login/password hashing)
+python-multipart==0.0.9
+
+# --- Computer vision / pose estimation ---
+opencv-python==4.10.0.84
+mediapipe==0.10.35
+numpy==1.26.4
+
+# --- Machine learning ---
+scikit-learn==1.5.2
+joblib==1.4.2
+pandas==2.2.3
+
+# --- Notifications ---
+requests==2.32.3
+twilio==9.3.7  # optional: uncomment + `pip install twilio` to enable real SMS/voice-call alerts (see app/alerts/sms_notifier.py + SMS_* env vars). Left commented out by default so the base install stays lightweight.
+
+# --- Reports (PDF / Excel) ---
+reportlab==4.2.5
+openpyxl==3.1.5
+matplotlib==3.9.2
+
+# --- WebSocket support (bundled with uvicorn[standard], listed for clarity) ---
+websockets==13.1
+
+# --- Testing ---
+pytest==8.3.3
+httpx==0.27.2
+
+# --- Utilities ---
+python-dotenv==1.0.1

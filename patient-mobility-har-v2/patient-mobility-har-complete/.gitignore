@@ -1,0 +1,31 @@
+# Environment files
+.env
+backend/.env
+frontend/.env
+
+# Python
+backend/venv/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+
+# Generated model artifacts (regenerate via `python -m app.ml.train_model`)
+backend/models_store/*.pkl
+backend/app/ml/data/training_features.csv
+
+# Runtime data
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/logs/*.log
+backend/*.db
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+backend/app/ml/data/raw_clips/
+backend/models_store/pose_landmarker_full.task

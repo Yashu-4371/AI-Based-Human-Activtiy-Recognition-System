@@ -1,0 +1,97 @@
+version: "3.9"
+
+# ==========================================================
+# AI-Based Human Activity Recognition System — Docker Compose
+# ==========================================================
+# Quick start:  docker-compose up --build
+# Backend:      http://localhost:8000  (Swagger docs at /docs)
+# Frontend:     http://localhost:80
+#
+# Webcam access: passing a physical camera into a Linux container
+# requires --device=/dev/video0 on the backend service (see
+# docs/deployment_guide.md). IP/RTSP camera sources work without any
+# extra device passthrough since they're accessed over the network.
+# ==========================================================
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: har-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./patient_mobility.db}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in .env}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - DEFAULT_ADMIN_EMAIL=${DEFAULT_ADMIN_EMAIL:-admin@example.com}
+      - DEFAULT_ADMIN_PASSWORD=${DEFAULT_ADMIN_PASSWORD:?DEFAULT_ADMIN_PASSWORD must be set in .env}
+      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-http://localhost}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
+      - TELEGRAM_ENABLED=${TELEGRAM_ENABLED:-false}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_models:/app/models_store
+      - backend_logs:/app/logs
+    # Uncomment to pass a physical webcam through to the container (Linux host only):
+    # devices:
+    #   - /dev/video0:/dev/video0
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - har-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: har-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - har-network
+
+  # Optional: switch DATABASE_URL above to point here for a production-grade
+  # database instead of the default SQLite file. Uncomment to enable.
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: har-postgres
+  #   restart: unless-stopped
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_DB:-patient_mobility}
+  #     - POSTGRES_USER=${POSTGRES_USER:-har_user}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - har-network
+
+networks:
+  har-network:
+    driver: bridge
+
+volumes:
+  backend_uploads:
+  backend_models:
+  backend_logs:
+  # postgres_data:
